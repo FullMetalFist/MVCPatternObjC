@@ -55,7 +55,7 @@
     self.volumeData.isMuted = !self.volumeData.isMuted;
     
     // Update the view layer
-    [self synchronizeWithData];
+    // remove [sync with data] call
 }
 
 - (IBAction)changeVolume:(id)sender {
@@ -63,22 +63,19 @@
     self.volumeData.volumeWithoutMute = self.volumeSlider.integerValue;
     
     // Update the view layer
-    [self synchronizeWithData];
+    // remove [sync with data] call
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSKeyValueChangeKey,id> *)change context:(void *)context {
     if (object == self.volumeData) {
-        if ([keyPath isEqualToString:@"isMuted"]) {
-            NSNumber *oldValue = change[NSKeyValueChangeOldKey];
-            NSNumber *newValue = change[NSKeyValueChangeNewKey];
-            NSLog(@"Changed mute status from %d to %d", [oldValue boolValue], [newValue boolValue]);
-        } else if ([keyPath isEqualToString:@"volumeWithoutMute"]) {
-            NSNumber *oldValue = change[NSKeyValueChangeOldKey];
-            NSNumber *newValue = change[NSKeyValueChangeNewKey];
-            NSLog(@"Changed volume from %ld to %ld", [oldValue integerValue], [newValue integerValue]);
-        }
+        
         [self synchronizeWithData];
     }
+}
+
+- (void) dealloc {
+    [self.volumeData removeObserver:self forKeyPath:@"isMuted"];
+    [self.volumeData removeObserver:self forKeyPath:@"volumeWithoutMute"];
 }
 
 @end
