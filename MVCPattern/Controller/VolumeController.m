@@ -21,6 +21,11 @@
 }
 
 - (void)awakeFromNib {
+    NSKeyValueObservingOptions options = NSKeyValueObservingOptionNew|NSKeyValueObservingOptionOld;
+    [self.volumeData addObserver:self forKeyPath:@"isMuted" options:options context:NULL];
+    [self.volumeData addObserver:self forKeyPath:@"volumeWithoutMute" options:options context:NULL];
+    
+    
     [self synchronizeWithData];
 }
 
@@ -59,6 +64,21 @@
     
     // Update the view layer
     [self synchronizeWithData];
+}
+
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSKeyValueChangeKey,id> *)change context:(void *)context {
+    if (object == self.volumeData) {
+        if ([keyPath isEqualToString:@"isMuted"]) {
+            NSNumber *oldValue = change[NSKeyValueChangeOldKey];
+            NSNumber *newValue = change[NSKeyValueChangeNewKey];
+            NSLog(@"Changed mute status from %d to %d", [oldValue boolValue], [newValue boolValue]);
+        } else if ([keyPath isEqualToString:@"volumeWithoutMute"]) {
+            NSNumber *oldValue = change[NSKeyValueChangeOldKey];
+            NSNumber *newValue = change[NSKeyValueChangeNewKey];
+            NSLog(@"Changed volume from %ld to %ld", [oldValue integerValue], [newValue integerValue]);
+        }
+        [self synchronizeWithData];
+    }
 }
 
 @end
